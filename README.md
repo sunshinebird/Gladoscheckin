@@ -2,9 +2,9 @@
 
 ## 食用方式：
 
-### 注册一个GLaDOS的账号([注册地址](https://glados.space/landing/0A58E-NV28S-6U3QV-33VMG))
+### 注册一个GLaDOS的账号([注册地址](https://glados.space/landing/JJYJ2-8ZMY7-JRW8R-XFXHA))
 
-#### 我的邀请码：([0A58E-NV28S-6U3QV-33VMG](https://0a58e-nv28s-6u3qv-33vmg.glados.space)) 
+#### 我的邀请码：([JJYJ2-8ZMY7-JRW8R-XFXHA](https://jjyj2-8zmy7-jrw8r-xfxha.glados.space)) 
 
 ### **Fork**本仓库
 
@@ -73,6 +73,7 @@
 ## 声明
 
 本项目不保证稳定运行与更新, 因GitHub相关规定可能会删库, 请注意备份
+
 
 
 
