@@ -1,6 +1,7 @@
 """Run the official check-in page in a visible Chromium browser."""
 
 import datetime as dt
+import json
 import logging
 import os
 import re
@@ -109,6 +110,26 @@ class BrowserAccountAPI:
         return f"兑换失败: {payload.get('message', '未知错误')}"
 
 
+def log_browser_state(page, entry, domain):
+    try:
+        state = page.evaluate("""() => ({
+            visibility: document.visibilityState,
+            focused: document.hasFocus(),
+            platform: navigator.platform,
+            viewport: {width: innerWidth, height: innerHeight},
+            screen: {width: screen.width, height: screen.height},
+            verification_token_present: Array.from(
+                document.querySelectorAll('input[name="cf-turnstile-response"]')
+            ).some(input => input.value.length > 0)
+        })""")
+        if isinstance(state, dict):
+            entry.log(domain, LogEmoji.INFO,
+                      f"浏览器验证状态: {json.dumps(state, ensure_ascii=True, sort_keys=True)}",
+                      force=True)
+    except Exception:
+        logger.debug("Browser state was unavailable")
+
+
 def run_account(browser, entry, config, budget):
     domain, days = entry._resolve_domain(config, budget)
     if domain is None or budget.expired():
@@ -132,6 +153,7 @@ def run_account(browser, entry, config, budget):
         if daily_points(points_before) is not None:
             result = CheckinResult(domain=domain, code=CheckinStatus.REPEAT)
         else:
+            log_browser_state(page, entry, domain)
             button = page.locator("button.ckb")
             if not button.count():
                 button = page.get_by_role("button", name=re.compile(r"^(签到|簽到|check[\s-]*in)", re.I))
@@ -148,6 +170,8 @@ def run_account(browser, entry, config, budget):
                 pending.value.json(), domain,
                 lambda emoji, message, force=False: entry.log(domain, emoji, message, force=True),
             )
+            if result.code is CheckinStatus.FAILURE:
+                log_browser_state(page, entry, domain)
 
         result.domain = domain
         result.days = left_days(status) if left_days(status) is not None else days
@@ -179,7 +203,9 @@ def main():
     else:
         budget = RunBudget()
         with sync_playwright() as playwright:
-            browser = playwright.chromium.launch(headless=False)
+            browser = playwright.chromium.launch(
+                headless=False, args=["--window-size=1440,1000"]
+            )
             try:
                 for entry in config.accounts:
                     try:
