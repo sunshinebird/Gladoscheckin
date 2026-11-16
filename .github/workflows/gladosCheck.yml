@@ -42,8 +42,11 @@ jobs:
     - name: Verify check-in and exchange handling
       run: python -m unittest discover -s tests -v
 
+    - name: Install Chromium
+      run: python -m playwright install --with-deps chromium
+
     - name: Running checkin
-      run: python checkin.py
+      run: xvfb-run -a python browser_checkin.py
       env:
         PUSHDEER_SENDKEY: ${{ secrets.PUSHDEER_SENDKEY }}
         SERVERCHAN_SENDKEY: ${{ secrets.SERVERCHAN_SENDKEY }}
