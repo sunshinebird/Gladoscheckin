@@ -1,10 +1,52 @@
 # Glados自动签到
 
+## 2026-11 自动签到升级
+
+脚本同步自 `Devilstore/Glados-Railgun-checkin` 的
+`4d3e1e5baea76086c43d7c02c2401b5639d2d715`（2026-11-11）。
+支持新版 challenge、设备平台匹配、域名探测及旧版 Cookie 配置。
+
+- GitHub Actions 使用 Ubuntu 24.04 和 Python 3.13。
+- 北京时间每天 09:18 自动运行一次；当天已签到属于正常结果。
+- 默认达到 500 积分后兑换 100 天；不足时保留积分，不会使用现金购买套餐。
+- 兑换只提交一次，网络结果不确定时不重放请求；成功后重新查询积分和剩余天数。
+- 签到、配置或兑换失败会让任务变红；结果保存在每次运行的 Summary。
+- Cookie 过期仍需重新登录并更新 `GLADOS_COOKIES`。脚本不会保存密码或自动重新登录。
+- 保活步骤用于降低长期无仓库活动导致定时任务停用的风险，不删除运行记录。
+
+`GLADOS_COOKIES` 推荐使用以下 JSON 数组格式。所有会话值只保存到 Actions Secret：
+
+```json
+[
+  {
+    "name": "主账号",
+    "origin": "glados.one",
+    "cookie": "gld:sess=...; gld:sess.sig=...",
+    "user-agent": "提取 Cookie 时浏览器的完整 User-Agent"
+  }
+]
+```
+
+兼容原来的单 Cookie 和 `&` 分隔的多账号配置。不要将 Cookie 写入代码或提交到仓库。
+`origin` 只接受脚本内置的 GLaDOS / Railgun 域名。
+
+`GLADOS_EXCHANGE_PLAN` 可配置为 Secret 或 Repository Variable，Secret 优先；
+支持 `plan100`、`plan200`、`plan500`，设置 `none` 关闭兑换。工作流未配置时使用
+`plan500`；直接在本地运行脚本时，未配置则不兑换。
+`PUSHDEER_SENDKEY` 和 `SERVERCHAN_SENDKEY` 为可选推送配置；没有配置时只记录 Actions 结果。
+
+本地验证：
+
+```sh
+python -m pip install -r requirements.txt
+python -m unittest discover -s tests -v
+```
+
 ## 食用方式：
 
 ### 注册一个GLaDOS的账号([注册地址](https://glados.space/landing/JJYJ2-8ZMY7-JRW8R-XFXHA))
 
-#### 我的邀请码：([JJYJ2-8ZMY7-JRW8R-XFXHA](https://jjyj2-8zmy7-jrw8r-xfxha.glados.space)) 
+#### 我的邀请码：([JJYJ2-8ZMY7-JRW8R-XFXHA](https://jjyj2-8zmy7-jrw8r-xfxha.glados.space))
 
 ### **Fork**本仓库
 
@@ -46,7 +88,10 @@
 
 - 添加1个`repository secret`，命名为`PUSHDEER_SENDKEY`，其值对应 PushDeer key: ([获取地址](https://www.pushdeer.com/product.html))。
 
-### **star**自己的仓库
+### 启用并验证 Actions
+
+进入 `Actions` → `GLaDOS Check-in` → `Run workflow` 验证自动脚本。
+此后由定时任务运行，无需给仓库点 Star。
 
 ![图片加载失败](imgs/4.png)
 
