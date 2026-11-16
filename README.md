@@ -14,6 +14,13 @@
 - Cookie 过期仍需重新登录并更新 `GLADOS_COOKIES`。脚本不会保存密码或自动重新登录。
 - 保活步骤用于降低长期无仓库活动导致定时任务停用的风险，不删除运行记录。
 
+Actions 使用 `browser_checkin.py`，通过 Playwright 和 Xvfb 运行可见的 Chromium，
+点击官网签到按钮，由官网自身完成 Cloudflare 校验并提交请求；不伪造校验结果。
+签到后检查服务端当日积分记录，再按余额执行兑换。若服务端要求人工验证，
+工作流会报告失败，不将未入账的签到标为成功。
+纯 HTTP 入口 `checkin.py` 仍保留用于排查。
+浏览器流程参考上游 1.0.1（`8ca67db`）的官网按钮及积分记录判定方式。
+
 `GLADOS_COOKIES` 推荐使用以下 JSON 数组格式。所有会话值只保存到 Actions Secret：
 
 ```json

@@ -2,3 +2,4 @@
 requests>=2.31,<3
 pypushdeer==0.0.3
 serverchan-sdk>=1.0.6,<2
+playwright==1.64.1
