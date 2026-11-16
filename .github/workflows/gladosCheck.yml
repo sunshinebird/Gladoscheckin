@@ -9,8 +9,8 @@ on:
       - 'imgs/**'
       - 'THIRD_PARTY_NOTICES.md'
   schedule:
-    # UTC: Beijing 09:18.
-    - cron: '18 1 * * *'
+    # UTC: prepare at Beijing 08:55, then check in randomly between 09:00 and 09:30.
+    - cron: '55 0 * * *'
 
 concurrency:
   group: glados-checkin
@@ -20,7 +20,7 @@ jobs:
   build:
     name: glados checkin
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 50
     permissions:
       contents: read
       actions: write
@@ -44,6 +44,33 @@ jobs:
 
     - name: Install Chromium
       run: python -m playwright install --with-deps chromium
+
+    - name: Wait for randomized Beijing check-in time
+      if: ${{ github.event_name == 'schedule' }}
+      run: |
+        python -u - <<'PY'
+        import datetime as dt
+        import secrets
+        import time
+        from zoneinfo import ZoneInfo
+
+        timezone = ZoneInfo("Asia/Shanghai")
+        now = dt.datetime.now(timezone)
+        window_start = now.replace(hour=9, minute=0, second=0, microsecond=0)
+        window_end = window_start + dt.timedelta(minutes=30)
+
+        if now > window_end:
+            print("::warning::GitHub scheduling or setup passed 09:30 Beijing; checking in immediately.")
+        else:
+            earliest = max(now, window_start)
+            offset = secrets.randbelow(int((window_end - earliest).total_seconds()) + 1)
+            target = earliest + dt.timedelta(seconds=offset)
+            print(f"Random check-in target (Beijing): {target.isoformat(timespec='seconds')}")
+            while (remaining := (target - dt.datetime.now(timezone)).total_seconds()) > 0:
+                time.sleep(min(remaining, 60))
+
+        print(f"Starting check-in (Beijing): {dt.datetime.now(timezone).isoformat(timespec='seconds')}")
+        PY
 
     - name: Running checkin
       run: xvfb-run -a python browser_checkin.py
