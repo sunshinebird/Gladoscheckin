@@ -30,6 +30,10 @@
 兼容原来的单 Cookie 和 `&` 分隔的多账号配置。不要将 Cookie 写入代码或提交到仓库。
 `origin` 只接受脚本内置的 GLaDOS / Railgun 域名。
 
+工作流优先使用 `GLADOS_COOKIES_V2` Secret，未设置时回退到原来的
+`GLADOS_COOKIES`。本仓库恢复运行时将当前登录会话保存到 V2，保留原配置；
+后续刷新会话时更新正在使用的 V2 Secret 即可。
+
 `GLADOS_EXCHANGE_PLAN` 可配置为 Secret 或 Repository Variable，Secret 优先；
 支持 `plan100`、`plan200`、`plan500`，设置 `none` 关闭兑换。工作流未配置时使用
 `plan500`；直接在本地运行脚本时，未配置则不兑换。
