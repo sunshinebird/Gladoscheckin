@@ -47,7 +47,7 @@ jobs:
       env:
         PUSHDEER_SENDKEY: ${{ secrets.PUSHDEER_SENDKEY }}
         SERVERCHAN_SENDKEY: ${{ secrets.SERVERCHAN_SENDKEY }}
-        GLADOS_COOKIES: ${{ secrets.GLADOS_COOKIES }}
+        GLADOS_COOKIES: ${{ secrets.GLADOS_COOKIES_V2 || secrets.GLADOS_COOKIES }}
         GLADOS_EXCHANGE_PLAN: ${{ secrets.GLADOS_EXCHANGE_PLAN || vars.GLADOS_EXCHANGE_PLAN || 'plan500' }}
         GLADOS_VERBOSE: ${{ secrets.GLADOS_VERBOSE || vars.GLADOS_VERBOSE }}
 
